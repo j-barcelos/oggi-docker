@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Automated Deploy Script - Oggi Barueri (Git-Based)
-Versão: 3.0 - Com Clone do GitHub
+Versão: 3.1 - COM CORREÇÕES DE SINTAXE
 Repositório: https://github.com/j-barcelos/aluguel_carrinho-sorvete
 """
 
@@ -111,7 +111,7 @@ def collect_user_inputs():
             f.write(f"# OGGIBARUERI DEPLOY CREDENTIALS\n")
             f.write(f"# Gerado em: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
             f.write(f"# DOMÍNIO: {config['main_domain']}\n")
-            f.write(f"# ===========================================\n\n")
+            f.write("# ===========================================\n\n")
             for k, v in config.items():
                 if 'password' in k.lower() or 'secret' in k.lower():
                     f.write(f"{k.upper()}={v}\n")
@@ -460,6 +460,14 @@ def get_setup_commands():
     ]
 
 # ============================================================================
+# FUNÇÃO ADICIONAL: CORREÇÃO PARA EXIBIÇÃO DE COMANDOS
+# ============================================================================
+
+def step(msg):
+    """Função auxiliar para exibir passos"""
+    return f"{Colors.CYAN}▸{Colors.RESET} {msg}"
+
+# ============================================================================
 # EXECUÇÃO SSH E DEPLOY
 # ============================================================================
 
@@ -483,7 +491,7 @@ def run_ssh_command(host: str, user: str, command: str, config: dict) -> tuple:
 
 def clone_repository_via_ssh(host: str, user: str, config: dict) -> bool:
     """Clona o repositório diretamente no servidor"""
-    print(f"\n{Colors.step('Clonando repositório GitHub no servidor')}")
+    print(f"\n{step('Clonando repositório GitHub no servidor')}")
     
     commands = [
         f"cd {REMOTE_BASE_DIR}",
@@ -498,15 +506,16 @@ def clone_repository_via_ssh(host: str, user: str, config: dict) -> bool:
     for cmd in commands:
         ok, out, err = run_ssh_command(host, user, cmd, config)
         if ok:
-            print(f"  {Colors.success(cmd[:50]}...")
+            print(f"  {Colors.success(cmd[:50])}...")
         else:
-            print(f"  {Colors.warning(f'{cmd[:50]}... Erro: {err[:50]}')}")
+            truncated_err = err[:50] if err else "desconhecido"
+            print(f"  {Colors.warning(f'{cmd[:50]}... Erro: {truncated_err}')}")
     
     return True
 
 def create_remote_files(host: str, user: str, config: dict) -> bool:
     """Cria todos os arquivos de configuração no servidor"""
-    print(f"\n{Colors.step('Criando arquivos de configuração')}")
+    print(f"\n{step('Criando arquivos de configuração')}")
     
     files = {
         f'{REMOTE_BASE_DIR}/.env': get_dotenv(config),
@@ -555,7 +564,7 @@ def create_remote_files(host: str, user: str, config: dict) -> bool:
 
 def setup_docker(host: str, user: str, config: dict) -> bool:
     """Configura Docker e inicia containers"""
-    print(f"\n{Colors.step('Construindo e iniciando containers')}")
+    print(f"\n{step('Construindo e iniciando containers')}")
     
     commands = [
         f"cd {REMOTE_BASE_DIR}",
@@ -570,7 +579,7 @@ def setup_docker(host: str, user: str, config: dict) -> bool:
     for cmd in commands:
         ok, out, err = run_ssh_command(host, user, cmd, config)
         status = "✓" if ok else "⚠"
-        print(f"  {status} {cmd[:50]}...")
+        print(f"  {status} {cmd[:45]}...")
         if not ok and err:
             print(f"     {Colors.warning(err[:100])}")
     
@@ -578,8 +587,8 @@ def setup_docker(host: str, user: str, config: dict) -> bool:
 
 def setup_ssl_instructions(host: str, user: str, config: dict):
     """Fornece instruções para SSL"""
-    print(f"\n{Colors.step('Configuração SSL (Let\\'s Encrypt)')}")
-    print(f"\n{Colors.WARNING}Execute estes comandos manualmente no servidor:{Colors.RESET}\n")
+    print(f"\n{step('Configuração SSL (Let\\'s Encrypt)')}")
+    print(f"\n{Colors.YELLOW}Execute estes comandos manualmente no servidor:{Colors.RESET}\n")
     print(f"  ssh {user}@{host}")
     print(f"  cd {REMOTE_BASE_DIR}")
     print(f"  ")
@@ -599,8 +608,8 @@ def setup_ssl_instructions(host: str, user: str, config: dict):
 
 def setup_admin_user(host: str, user: str, config: dict):
     """Fornece instruções para criar superusuário"""
-    print(f"\n{Colors.step('Criar Superusuário Django Admin')}")
-    print(f"\n{Colors.WARNING}Execute no servidor (dados interativos){Colors.RESET}\n")
+    print(f"\n{step('Criar Superusuário Django Admin')}")
+    print(f"\n{Colors.YELLOW}Execute no servidor (dados interativos){Colors.RESET}\n")
     print(f"  ssh {user}@{host}")
     print(f"  cd {REMOTE_BASE_DIR}")
     print(f"  docker exec -it oggi_django python manage.py createsuperuser")
@@ -609,7 +618,7 @@ def setup_admin_user(host: str, user: str, config: dict):
     print(f"    • Username: admin (sugerido)")
     print(f"    • Email: {config['admin_email']}")
     print(f"    • Password: (digite e confirme)")
-    print(f"\n{Colors.SUCCESS}Depois acesse: http://{config['ssh_host']}/admin/{Colors.RESET}")
+    print(f"\n{Colors.GREEN}Depois acesse: http://{config['ssh_host']}/admin/{Colors.RESET}")
 
 def show_dashboard(config: dict):
     """Mostra dashboard de acesso"""
@@ -664,7 +673,7 @@ def main():
 ║     🚀 Método: Git Clone Direct                          ║
 ║     🎯 Domínio: {Colors.CYAN}oggibarueri.com.br{Colors.RESET}                       ║
 ║                                                           ║
-║     ⚡ Versão 3.0 - Git Based                             ║
+║     ⚡ Versão 3.1 - COM CORREÇÕES DE SINTAXE               ║
 ╚═══════════════════════════════════════════════════════════╝
 {Colors.RESET}
 """)
@@ -676,12 +685,12 @@ def main():
     user = config['ssh_user']
     
     # Testar conexão SSH
-    print(f"\n{Colors.step('Testando conexão SSH')}")
+    print(f"\n{step('Testando conexão SSH')}")
     ok, out, err = run_ssh_command(host, user, "hostname", config)
     if not ok:
-        print(f"\n{Colors.ERROR}❌ Falha na conexão SSH{Colors.RESET}")
+        print(f"\n{Colors.error('❌ Falha na conexão SSH')}")
         print(f"  {Colors.warning(f'Erro: {err[:200]}')}")
-        print(f"\n{Colors.INFO}Verifique:{Colors.RESET}")
+        print(f"\n{Colors.info('Verifique:')}")
         print(f"  • IP do servidor está correto")
         print(f"  • Usuário e senha/chave estão corretos")
         print(f"  • Porta SSH (22) está aberta")
@@ -690,13 +699,13 @@ def main():
     print(f"  {Colors.success('Conectado como: ' + out.strip())}")
     
     # Fase 1: Setup do servidor
-    print(f"\n{Colors.step('Setup do Servidor Hostinger')}")
+    print(f"\n{step('Setup do Servidor Hostinger')}")
     for cmd in get_setup_commands():
         ok, _, _ = run_ssh_command(host, user, cmd, config)
         print(f"  {'✓' if ok else '⚠'} {cmd[:45]}...")
     
     # Fase 2: Criar diretórios
-    print(f"\n{Colors.step('Criando estrutura de diretórios')}")
+    print(f"\n{step('Criando estrutura de diretórios')}")
     dirs = [
         f"{REMOTE_BASE_DIR}",
         f"{REMOTE_BASE_DIR}/app",
@@ -712,16 +721,16 @@ def main():
     
     # Fase 3: Clonar repositório
     if not clone_repository_via_ssh(host, user, config):
-        print(f"\n{Colors.ERROR}❌ Falha ao clonar repositório{Colors.RESET}")
+        print(f"\n{Colors.error('❌ Falha ao clonar repositório')}")
         return 1
     
     # Fase 4: Criar arquivos de configuração
     if not create_remote_files(host, user, config):
-        print(f"\n{Colors.WARNING}⚠ Alguns arquivos podem não ter sido criados{Colors.RESET}")
+        print(f"\n{Colors.warning('⚠ Alguns arquivos podem não ter sido criados')}")
     
     # Fase 5: Iniciar containers
     if not setup_docker(host, user, config):
-        print(f"\n{Colors.ERROR}❌ Falha ao iniciar containers{Colors.RESET}")
+        print(f"\n{Colors.error('❌ Falha ao iniciar containers')}")
         return 1
     
     # Fase 6: SSL e Admin
@@ -732,11 +741,11 @@ def main():
     show_dashboard(config)
     
     print(f"\n{Colors.BOLD}{'='*60}{Colors.RESET}")
-    print(f"{Colors.SUCCESS}🎉 DEPLOY CONCLUÍDO COM SUCESSO! 🍦{Colors.RESET}")
+    print(f"{Colors.success('🎉 DEPLOY CONCLUÍDO COM SUCESSO! 🍦')}")
     print(f"{Colors.BOLD}{'='*60}{Colors.RESET}")
     
     print(f"""
-{Colors.INFO}PRÓXIMOS PASSOS RECOMENDADOS:{Colors.RESET}
+{Colors.info('PRÓXIMOS PASSOS RECOMENDADOS:')}
 
 1.  Configure DNS no Hostinger:
     - A Record: {config['main_domain']} → {config['ssh_host']}
@@ -758,7 +767,7 @@ def main():
     chown -R www-data:www-data {REMOTE_BASE_DIR}/media
     chmod -R 755 {REMOTE_BASE_DIR}
 
-{Colors.CYAN}Obrigado por usar Oggi Barueri Deploy! 🚀{Colors.RESET}
+{Colors.cyan('Obrigado por usar Oggi Barueri Deploy! 🚀')}
 """)
     
     return 0
