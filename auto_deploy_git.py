@@ -2071,7 +2071,7 @@ def main():
             (
                 "DEBIAN_FRONTEND=noninteractive "
                 "apt-get install -y "
-                "docker.io docker-compose-plugin git curl"
+                "docker.io docker-compose git curl"
             ),
             "systemctl enable --now docker",
 
