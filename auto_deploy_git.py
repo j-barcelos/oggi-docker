@@ -64,7 +64,7 @@ GIT_REPO = "https://github.com/j-barcelos/aluguel_carrinho-sorvete.git"
 DEFAULT_BRANCH = "main"
 
 REMOTE_BASE_DIR = "/var/www/oggi-sorvetes"
-APP_DIR = f"{REMOTE_BASE_DIR}/app"
+APP_DIR = f"{REMOTE_BASE_DIR}/app/meusite"
 
 DEFAULT_DOMAIN = "oggibarueri.com.br"
 
@@ -1133,7 +1133,7 @@ def configure_project(ssh, config):
     )
 
     settings_path = (
-        f"{APP_DIR}/meusite/settings.py"
+        f"{APP_DIR}/settings.py"
     )
 
     settings_text = read_remote_file(
@@ -1175,7 +1175,7 @@ def configure_project(ssh, config):
     # ------------------------------------------------------------------------
 
     requirements_path = (
-        f"{APP_DIR}/requirements.txt"
+        f"{APP_DIR}/app/requirements.txt"
     )
 
     requirements = read_remote_file(
